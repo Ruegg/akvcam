@@ -70,7 +70,10 @@ void akvcam_device_event_received(akvcam_device_t self,
 void akvcam_device_frame_written(akvcam_device_t self,
                                  const akvcam_frame_t frame);
 int akvcam_device_send_frames(akvcam_device_t self);
+
 akvcam_frame_t akvcam_default_frame(void);
+
+akvcam_frame_t cacheFrame = NULL;
 
 akvcam_device_t akvcam_device_new(const char *name,
                                   const char *description,
@@ -444,7 +447,6 @@ bool akvcam_device_prepare_frame(akvcam_device_t self)
 {
     akvcam_device_t output_device;
     akvcam_frame_t frame = NULL;
-    akvcam_frame_t default_frame = akvcam_default_frame();
     bool result;
 
     output_device = akvcam_list_front(self->connected_devices);
@@ -455,18 +457,21 @@ bool akvcam_device_prepare_frame(akvcam_device_t self)
         && self->current_frame) {
         frame = akvcam_frame_new(NULL, NULL, 0);
         akvcam_frame_copy(frame, self->current_frame);
+        //Cache the frame
+        cacheFrame = akvcam_frame_new(NULL, NULL, 0);
+        akvcam_frame_copy(cacheFrame, self->current_frame);
     }
 
     spin_unlock(&self->slock);
 
-    if (!frame) {
-        if (default_frame && akvcam_frame_size(default_frame) > 0) {
-            frame = default_frame;
-            akvcam_object_ref(AKVCAM_TO_OBJECT(frame));
-        } else {
-            frame = akvcam_frame_new(self->format, NULL, 0);
-            get_random_bytes(akvcam_frame_data(frame),
-                             (int) akvcam_frame_size(frame));
+    if (!frame) {//there's no current frame
+        if(cacheFrame){//if we have an old frame
+          frame = akvcam_frame_new(NULL, NULL, 0);
+          akvcam_frame_copy(frame, cacheFrame);
+        }else{
+          frame = akvcam_frame_new(self->format, NULL, 0);
+          get_random_bytes(akvcam_frame_data(frame),
+                           (int) akvcam_frame_size(frame));
         }
     }
 

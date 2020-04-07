@@ -2,26 +2,6 @@
 
 akvcam is a fully compliant V4L2 virtual camera driver for Linux.
 
-## Features ##
+## Modifications
 
-* Flexible configuration with a simple INI file like.
-* Support for map, user pointer, and read/write modes.
-* Can cat and echo to the device.
-* Supports emulated camera controls in capture devices (brightness, contrast, saturation, etc.).
-* Configurable default picture in case no input signal available.
-* The devices can't be rejected by programs that rejects M2M devices.
-* Fully compliant with V4L2 standard.
-* Support for LTS kernels.
-
-## Build and Install ##
-
-Visit the [wiki](https://github.com/webcamoid/akvcam/wiki) for a comprehensive compile and install instructions.
-
-## Status ##
-
-[![Build Status](https://travis-ci.org/webcamoid/akvcam.svg?branch=master)](https://travis-ci.org/webcamoid/akvcam)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/eaeeaacb491c498bbffbe2087bc2d4dd)](https://www.codacy.com/gh/webcamoid/akvcam?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=webcamoid/akvcam&amp;utm_campaign=Badge_Grade)
-
-## Reporting Bugs ##
-
-Report all issues in the [issues tracker](http://github.com/webcamoid/akvcam/issues).
+This is a modified fork I've written of akvcam. One of the few but detrimental issues I've come across with akvcam is fluid streaming to the virtual device, as when akvcam isn't receiving frames at a perfect consistent rate, it shows an RGB static background which at my best efforts will show intermittently and indefinitely when writing to the device. This modified fork solves that by caching frames, meaning whenever akvcam isn't receiving a frame, it will use the last frame it did receive. This solves the issue and allows fluid and consistent streaming.
